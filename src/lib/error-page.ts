@@ -1,0 +1,1 @@
+export function renderErrorPage():string{return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"/><title>Erro</title><meta name="viewport" content="width=device-width, initial-scale=1"/></head><body><h1>Esta página não carregou</h1><p>Algo deu errado. Atualize a página e tente novamente.</p></body></html>`;}
