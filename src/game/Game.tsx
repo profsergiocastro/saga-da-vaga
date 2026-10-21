@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DialogBox, DocsModal, HelpModal, Key, Menu, Notebook, Overlay, Panel, QuizModal, Confirm } from "./ui";
+import { DialogBox, DocsModal, HelpModal, Key, Menu, Notebook, Overlay, Panel, QuizModal, Confirm, OpeningCrawl } from "./ui";
 import { ACHIEVEMENTS, OBJECTIVES, apply, dialogFor, initialProgress, type Action, type NpcId, type Progress } from "./quest";
 import { GATE, H, INTERACT, START, TS, VH, VW, W, buildWorld, isSolidTile } from "./world";
 import { drawChar, drawFlag, drawGate, drawMarker, drawMoto, prerender, type Dir, type Look } from "./render";
 
-type Mode = "start" | "play" | "dialog" | "quiz" | "docs" | "notebook" | "help" | "pause" | "ending";
+type Mode = "intro" | "start" | "play" | "dialog" | "quiz" | "docs" | "notebook" | "help" | "pause" | "ending";
 type Npc = { id: NpcId; name: string; x: number; y: number; dir: Dir; look: Look };
 
 const SAVE_KEY = "saga-da-vaga-v1";
@@ -28,8 +28,8 @@ type SaveData = { progress: Progress; player: { x: number; y: number; dir: Dir }
 
 export default function Game() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [mode, setModeState] = useState<Mode>("start");
-  const modeRef = useRef<Mode>("start");
+  const [mode, setModeState] = useState<Mode>("intro");
+  const modeRef = useRef<Mode>("intro");
   const [progress, setProgress] = useState<Progress>(initialProgress);
   const progRef = useRef(progress);
   progRef.current = progress;
@@ -294,7 +294,7 @@ export default function Game() {
   }, []);
 
   const obj = OBJECTIVES[progress.step] ?? OBJECTIVES[0]!;
-  const inGame = mode !== "start";
+  const inGame = mode !== "start" && mode !== "intro";
 
   return (
     <div className="game-stage">
@@ -325,6 +325,8 @@ export default function Game() {
             {toast && mode !== "ending" && <div className="hud-toast absolute left-1/2 top-16 z-40 -translate-x-1/2">{toast}</div>}
           </>
         )}
+
+        {mode === "intro" && <OpeningCrawl onDone={() => setMode("start")} />}
 
         {mode === "start" && (
           <Overlay>

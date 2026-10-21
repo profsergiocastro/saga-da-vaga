@@ -75,11 +75,62 @@ export function DialogBox({ speaker, lines, onDone, blip }: { speaker: string; l
     <div className="absolute inset-x-3 bottom-3 z-30" onClick={next}>
       <div className="pixel-panel game-dialog relative cursor-pointer">
         <span className="pixel-nametag">{speaker}</span>
-        <p className="font-game min-h-[3.2em] text-xl leading-relaxed text-panel-foreground">{text.slice(0, shown)}</p>
-        <div className="mt-1 flex justify-between font-game text-sm text-muted-foreground">
+        <p data-testid="dialog-body" style={{ color: "var(--paper-ink)", fontSize: "clamp(1.15rem, 2vw, 1.8rem)" }} className="font-game min-h-[3.2em] leading-relaxed">{text.slice(0, shown)}</p>
+        <div style={{ color: "var(--paper-ink)" }} className="mt-1 flex justify-between font-game text-sm">
           <span>{idx + 1}/{lines.length}</span>
           <span className="animate-pulse"><Key k="Enter" /> continuar · <Key k="Esc" /> fechar</span>
         </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+const OPENING_CRAWL = [
+  "HÁ MUITO TEMPO, NUM SERTÃO NÃO TÃO DISTANTE...",
+  "Na pacata São Raimundo Nonato, uma força misteriosa ameaça a paz dos estudantes: a burocracia acadêmica.",
+  "Um jovem aventureiro parte rumo ao IFPI com um sonho, uma caneta azul e a confiança de quem ainda não leu a lista de documentos.",
+  "Sua missão parece simples: fazer uma inscrição. Mas entre ele e o destino estão formulários, cópias, prazos e um carimbo que só aparece quando ninguém está olhando.",
+  "Pelo caminho, encontrará Dona Célia, guardiã dos grampos; Lia, mestra dos cálculos; e Beto, conselheiro cujos atalhos costumam aumentar o percurso.",
+  "Terá de decifrar enigmas matemáticos, organizar documentos na ordem correta e sobreviver ao lendário \"volte amanhã\".",
+  "Qualquer semelhança com a vida acadêmica é mera coincidência... devidamente protocolada em três vias.",
+  "Prepare o teclado. Confira o CPF. Respire fundo.",
+  "QUE O PROTOCOLO ESTEJA COM VOCÊ!"
+];
+
+export function OpeningCrawl({ onDone }: { onDone: () => void }) {
+  const doneRef = useRef(onDone);
+  doneRef.current = onDone;
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => doneRef.current(), 29_000);
+    return () => window.clearTimeout(timeout);
+  }, []);
+
+  useKeys((e) => {
+    if (["Enter", " ", "Escape"].includes(e.key) && !e.repeat) {
+      e.preventDefault();
+      doneRef.current();
+    }
+  });
+
+  return (
+    <div className="opening-crawl-overlay" onClick={() => doneRef.current()} data-testid="opening-crawl">
+      <div className="crawl-stars" aria-hidden="true" />
+      <div className="crawl-perspective" aria-hidden="true">
+        <div className="crawl-track">
+          <h2 className="crawl-heading">A SAGA DA VAGA</h2>
+          {OPENING_CRAWL.map((line, i) => (
+            <p key={line} className={i === 0 || i === OPENING_CRAWL.length - 1 ? "crawl-emphasis" : ""}>{line}</p>
+          ))}
+        </div>
+      </div>
+      <div className="crawl-footer">
+        <span>EPISÓDIO I · A INSCRIÇÃO</span>
+        <button type="button" className="crawl-skip" onClick={(e) => { e.stopPropagation(); doneRef.current(); }}>
+          Pular introdução <span>ENTER</span>
+        </button>
       </div>
     </div>
   );
