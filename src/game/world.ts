@@ -1,15 +1,16 @@
 export const TS = 16;
 export const W = 44;
 export const H = 30;
-export const VW = 320;
-export const VH = 192;
+export const VW = 400;
+export const VH = 240;
 
 export const T = {
   GRASS: 0, DRY: 1, ROAD: 2, WALK: 3, PLAZA: 4, CAMPUS: 5, WALL: 6, TREE: 7, CACTUS: 8,
   FLOWER: 9, BUSH: 10, BENCH: 11, FENCE: 12, BUILDING: 13, ROCK: 14, POLE: 15, MOTO: 16, FLAG: 17, SIGN: 18,
+  MON_ONCAS: 19, MON_TATU: 20, MON_SERIEMA: 21, CLOCK: 22,
 } as const;
 
-const SOLID = new Set<number>([6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+const SOLID = new Set<number>([6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]);
 export const isSolidTile = (t: number) => SOLID.has(t);
 
 export function hash(x: number, y: number, s = 0): number {
@@ -53,7 +54,7 @@ export function buildWorld(): World {
       const dry = hash(x, y, 1) < (y > 24 ? 0.45 : 0.18);
       t[y * W + x] = dry ? T.DRY : hash(x, y, 2) > 0.95 ? T.FLOWER : T.GRASS;
     }
-  // streets
+  // Streets and sidewalks
   rect(1, 10, 42, 10, T.WALK);
   rect(1, 13, 42, 13, T.WALK);
   rect(1, 11, 42, 12, T.ROAD);
@@ -64,7 +65,7 @@ export function buildWorld(): World {
   rect(6, 8, 6, 9, T.WALK);
   rect(14, 9, 14, 9, T.WALK);
   rect(38, 9, 38, 9, T.WALK);
-  // praça
+  // Praça Professor Júlio Paixão, popularmente conhecida como Praça do Relógio
   rect(6, 15, 16, 25, T.PLAZA);
   rect(10, 14, 12, 14, T.PLAZA);
   rect(17, 19, 18, 20, T.PLAZA);
@@ -73,7 +74,7 @@ export function buildWorld(): World {
   set(14, 17, T.BENCH);
   set(11, 20, T.CACTUS);
   for (const [x, y] of [[10, 20], [12, 20], [11, 19], [11, 21], [7, 16], [15, 24]]) set(x, y, T.FLOWER);
-  // campus
+  // Campus
   rect(25, 15, 42, 28, T.WALL);
   rect(26, 16, 41, 27, T.CAMPUS);
   rect(32, 14, 33, 14, T.WALK);
@@ -85,17 +86,27 @@ export function buildWorld(): World {
   for (const [x, y] of [[33, 25], [34, 25]]) set(x, y, T.BENCH);
   for (const [x, y] of [[27, 17], [30, 17], [36, 17], [40, 17], [28, 26], [39, 24]]) set(x, y, T.FLOWER);
   for (const [x, y] of [[26, 23], [41, 23], [26, 27], [41, 27]]) set(x, y, T.BUSH);
-  // buildings
+  // Buildings
   for (const b of BUILDINGS) rect(b.x, b.y, b.x + b.w - 1, b.y + b.h - 1, T.BUILDING);
-  // decor
+  // Local decoration
   for (const [x, y] of [[3, 27], [8, 27], [13, 28], [2, 16], [2, 21], [17, 27], [10, 2], [19, 2], [22, 3], [33, 2], [42, 2], [2, 8]]) set(x, y, T.TREE);
   for (const [x, y] of [[5, 26], [15, 27], [23, 24], [23, 18], [11, 9], [21, 6], [1, 18], [18, 16]]) set(x, y, T.CACTUS);
   for (const [x, y] of [[5, 28], [11, 27], [23, 27], [20, 4], [3, 23]]) set(x, y, T.ROCK);
   for (const [x, y] of [[1, 9], [2, 9], [10, 8], [11, 8]]) set(x, y, T.FENCE);
+  // New accessible branches to the landmarks; all artwork is original pixel art inspired by local references.
+  rect(3, 13, 3, 15, T.WALK);
+  rect(2, 15, 5, 15, T.PLAZA);
+  rect(5, 16, 5, 18, T.PLAZA);
+  rect(5, 24, 5, 27, T.WALK);
+  // Roundabout with the two onças, the armadillo monument, the seriema and the Praça do Relógio.
+  rect(2, 16, 4, 17, T.MON_ONCAS);
+  rect(2, 26, 4, 27, T.MON_TATU);
+  rect(23, 18, 24, 19, T.MON_SERIEMA);
+  rect(9, 17, 11, 18, T.CLOCK);
   const poles: [number, number][] = [[3, 10], [10, 10], [17, 10], [23, 10], [34, 10], [40, 10]];
   for (const [x, y] of poles) set(x, y, T.POLE);
   set(32, 10, T.MOTO);
-  // borders
+  // Map edge decoration
   for (let x = 0; x < W; x++) {
     set(x, 0, T.TREE);
     set(x, H - 1, x % 3 === 0 ? T.CACTUS : T.TREE);
@@ -115,12 +126,16 @@ export const INTERACT: Record<string, { label: string; lines: string[] }> = {
   "32,10": { label: "Moto", lines: ["Uma moto com adesivo: 'Deus é fiel e o freio também'."] },
   "8,22": { label: "Banco", lines: ["Um banco quentinho de sol. Ótimo pra revisar, péssimo pra cochilar."] },
   "14,17": { label: "Banco", lines: ["Alguém escreveu no banco: 'Beto esteve aqui (estudando, juro)'."] },
-  "11,20": { label: "Mandacaru", lines: ["Um mandacaru firme no canteiro. Resistente como estudante em semana de prova."] },
+  "10,18": { label: "Relógio da Praça", lines: ["O relógio é o ponto de referência da Praça Professor Júlio Paixão.", "Moradores chamam o lugar de Praça do Relógio. O mapa recria a praça em arte original, não copia uma fotografia.", "Dizem que o relógio sempre adianta na semana de prova. Conveniente, né?"] },
+  "11,20": { label: "Praça do Relógio", lines: ["Você está na Praça Professor Júlio Paixão, conhecida por todo mundo como Praça do Relógio.", "O relógio voltou a marcar as horas — pelo menos até a próxima reforma.", "Beto jura que ele adianta cinco minutos em semana de prova."] },
   "28,22": { label: "Bloco A", lines: ["Salas vazias... por enquanto. O Episódio 2 vem aí!"] },
   "38,22": { label: "Laboratórios", lines: ["Um cartaz na porta: 'Favor não alimentar o servidor'."] },
   "29,16": { label: "Bandeira", lines: ["A bandeira tremula no vento quente do sertão."] },
   "33,25": { label: "Banco", lines: ["Daqui dá pra ver a Serra ao longe. Dá vontade de estudar arqueologia."] },
   "34,25": { label: "Banco", lines: ["Daqui dá pra ver a Serra ao longe. Dá vontade de estudar arqueologia."] },
+  "3,16": { label: "Monumento das Onças", lines: ["Duas onças pintadas vigiam uma das entradas da cidade.", "Ledo Ivo transformou a fauna da região em cartão-postal. Tire uma foto mental e siga a missão!"] },
+  "4,26": { label: "Monumento do Tatu", lines: ["O tatu-canastra virou monumento em um monte de pedras claras.", "Até o tatu entendeu que pra entrar na cidade tem que passar por uma rotatória."] },
+  "23,19": { label: "Monumento da Seriema", lines: ["Uma seriema de pescoço comprido e pernas finas marca outra entrada da cidade.", "A placa imaginária diz: 'Corre mais rápido que o estudante atrasado'."] },
 };
 for (let x = 26; x <= 30; x++)
   INTERACT[`${x},14`] = { label: "Placa", lines: ["Placa: INSTITUTO FEDERAL — CAMPUS SRN.", "(Representação fictícia e independente, feita para este protótipo de fã.)"] };

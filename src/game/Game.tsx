@@ -126,7 +126,9 @@ export default function Game() {
     try { setHasSave(!!localStorage.getItem(SAVE_KEY)); } catch { /* ignore */ }
     const fit = () => {
       const s = Math.min((window.innerWidth - 24) / VW, (window.innerHeight - 24) / VH);
-      setScale(s >= 2 ? Math.floor(s) : Math.max(1, s));
+      // Keep pixel clusters from being enlarged to 4× or 5× on large monitors.
+      // Fractional fitting on smaller displays also avoids needlessly tiny viewports.
+      setScale(Math.max(1, Math.min(3, s)));
     };
     fit();
     window.addEventListener("resize", fit);
