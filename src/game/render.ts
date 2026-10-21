@@ -20,19 +20,24 @@ function ground(c: C, t: number, tx: number, ty: number) {
   const X = tx * TS, Y = ty * TS;
   switch (t) {
     case T.GRASS:
-      speckle(c, tx, ty, "#83a94a", ["#a7c66a", "#71963c", "#8fb755", "#6c8e37"], 8, 2);
-      if (hash(tx, ty, 191) > 0.62) {
-        px(c, "#c0d477", X + 3 + Math.floor(hash(tx, ty, 192) * 8), Y + 3 + Math.floor(hash(tx, ty, 193) * 8), 2, 1);
-        px(c, "#577c32", X + 2 + Math.floor(hash(tx, ty, 194) * 10), Y + 10 + Math.floor(hash(tx, ty, 195) * 4), 2, 1);
+      speckle(c, tx, ty, "#83a94a", ["#a7c66a", "#71963c", "#8fb755", "#6c8e37"], 4, 1);
+      if (hash(tx, ty, 191) > 0.5) {
+        const gx = X + 3 + Math.floor(hash(tx, ty, 192) * 8);
+        const gy = Y + 3 + Math.floor(hash(tx, ty, 193) * 8);
+        px(c, "#6e963e", gx, gy, 1, 3);
+        px(c, "#a8c96b", gx + 1, gy + 1, 2, 1);
+      }
+      if (hash(tx, ty, 194) > 0.72) {
+        px(c, "#577c32", X + 3 + Math.floor(hash(tx, ty, 195) * 9), Y + 11, 3, 1);
       }
       if (hash(tx, ty, 196) > 0.91) { px(c, "#f1c75f", X + 11, Y + 4, 1, 1); px(c, "#f7e6a2", X + 10, Y + 5, 3, 1); }
       break;
     case T.DRY:
-      speckle(c, tx, ty, "#cbb66f", ["#e0cc85", "#ae9853", "#bba45d", "#d4bf79"], 7, 2);
+      speckle(c, tx, ty, "#cbb66f", ["#e0cc85", "#ae9853", "#bba45d", "#d4bf79"], 4, 1);
       if (hash(tx, ty, 197) > 0.7) { px(c, "#a58d49", X + 3, Y + 12, 4, 1); px(c, "#e7d293", X + 4, Y + 11, 2, 1); }
       break;
     case T.ROAD:
-      speckle(c, tx, ty, "#858b84", ["#92988f", "#737b75", "#9b9d91", "#777e79"], 7, 1);
+      speckle(c, tx, ty, "#858b84", ["#92988f", "#737b75", "#9b9d91", "#777e79"], 3, 1);
       px(c, "#737b75", X, Y, TS, 1);
       px(c, "#a3a398", X, Y + 15, TS, 1);
       if (ty === 12 && (tx % 5 === 1 || tx % 5 === 2) && (tx < 18 || tx > 23)) {
@@ -291,7 +296,7 @@ function drawBuilding(c: C, b: Building) {
     }
   }
   if (b.sign) {
-    c.font = "bold 7px monospace";
+    c.font = "700 8px Arial, sans-serif";
     const tw = Math.ceil(c.measureText(b.sign).width) + 8;
     const sx = Math.round(X + Wd / 2 - tw / 2), sy = Y + roofH - 15;
     px(c, O, sx - 2, sy - 2, tw + 4, 13);
@@ -552,10 +557,10 @@ function drawCampusEntrance(c: C) {
   px(c, "#2e9b63", X + 7, Y + 14, 8, 2);
   px(c, "#1f5a41", X + 17, Y + 4, 2, 12);
   c.textBaseline = "top";
-  c.font = "bold 7px monospace";
+  c.font = "700 8px Arial, sans-serif";
   c.fillStyle = "#222722";
   c.fillText("INSTITUTO FEDERAL DO PIAUÍ", X + 27, Y + 3);
-  c.font = "bold 6px monospace";
+  c.font = "700 7px Arial, sans-serif";
   c.fillStyle = "#2e7d5b";
   c.fillText("Campus São Raimundo Nonato", X + 27, Y + 11);
 }

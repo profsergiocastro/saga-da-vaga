@@ -73,9 +73,9 @@ export function DialogBox({ speaker, lines, onDone, blip }: { speaker: string; l
   });
   return (
     <div className="absolute inset-x-3 bottom-3 z-30" onClick={next}>
-      <div className="pixel-panel relative cursor-pointer pt-5">
-        <span className="pixel-nametag font-pixel">{speaker}</span>
-        <p className="font-game min-h-[3.2em] text-xl leading-snug text-panel-foreground">{text.slice(0, shown)}</p>
+      <div className="pixel-panel game-dialog relative cursor-pointer">
+        <span className="pixel-nametag">{speaker}</span>
+        <p className="font-game min-h-[3.2em] text-xl leading-relaxed text-panel-foreground">{text.slice(0, shown)}</p>
         <div className="mt-1 flex justify-between font-game text-sm text-muted-foreground">
           <span>{idx + 1}/{lines.length}</span>
           <span className="animate-pulse"><Key k="Enter" /> continuar · <Key k="Esc" /> fechar</span>

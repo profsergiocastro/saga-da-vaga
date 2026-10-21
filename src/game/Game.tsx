@@ -221,7 +221,7 @@ export default function Game() {
     const ctx = cv.getContext("2d")!;
     ctx.imageSmoothingEnabled = false;
     const pre = prerender(game.current.world);
-    const motes = Array.from({ length: 22 }, () => ({ x: Math.random() * VW, y: Math.random() * VH, v: 4 + Math.random() * 8, ph: Math.random() * 6 }));
+    const motes = Array.from({ length: 10 }, () => ({ x: Math.random() * VW, y: Math.random() * VH, v: 3 + Math.random() * 6, ph: Math.random() * 6 }));
     let last = performance.now(), raf = 0, lastHint: string | null = "";
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
@@ -272,15 +272,15 @@ export default function Game() {
         ctx.fillRect(Math.round(mx - camX - i * 5), Math.round(12 * TS + 10 - camY - ((t * 20 + i * 3) % 4)), 3, 3);
       }
       // sun motes + warm light
-      ctx.fillStyle = "rgba(255,240,200,0.55)";
+      ctx.fillStyle = "rgba(255,240,200,0.32)";
       for (const m of motes) {
         m.x += Math.sin(t + m.ph) * dt * 4 + dt * m.v * 0.5; m.y -= dt * m.v * 0.3;
         if (m.x > VW) m.x = 0; if (m.y < 0) m.y = VH;
         ctx.fillRect(Math.round(m.x), Math.round(m.y), 1, 1);
       }
       const grad = ctx.createRadialGradient(VW * 0.85, -20, 10, VW * 0.6, VH * 0.4, VW);
-      grad.addColorStop(0, "rgba(255,210,120,0.22)");
-      grad.addColorStop(1, "rgba(120,60,20,0.12)");
+      grad.addColorStop(0, "rgba(255,210,120,0.14)");
+      grad.addColorStop(1, "rgba(120,60,20,0.06)");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, VW, VH);
       // hint
@@ -304,7 +304,7 @@ export default function Game() {
         {inGame && (
           <>
             <div className="hud-objective pointer-events-none absolute left-2 top-2 z-10 max-w-[60%]">
-              <p className="font-pixel text-[10px] text-sun">A SAGA DA VAGA · MISSÃO 01</p>
+              <p className="font-pixel text-xs tracking-wide text-sun">A SAGA DA VAGA · MISSÃO 01</p>
               <p className="font-game text-lg leading-tight text-panel-foreground">▶ {obj.title}</p>
               <p className="font-game text-sm leading-tight text-muted-foreground">{obj.hint}</p>
             </div>
@@ -322,7 +322,7 @@ export default function Game() {
             {mode === "play" && hint && (
               <div className="hud-hint pointer-events-none absolute bottom-2 right-2 z-10 font-game text-base"><Key k="Enter" /> {hint}</div>
             )}
-            {toast && mode !== "ending" && <div className="hud-toast absolute left-1/2 top-16 z-40 -translate-x-1/2 font-pixel text-xs">{toast}</div>}
+            {toast && mode !== "ending" && <div className="hud-toast absolute left-1/2 top-16 z-40 -translate-x-1/2">{toast}</div>}
           </>
         )}
 

@@ -1,7 +1,7 @@
 export const TS = 16;
 export const W = 44;
 export const H = 30;
-export const VW = 400;
+export const VW = 360;
 export const VH = 240;
 
 export const T = {
