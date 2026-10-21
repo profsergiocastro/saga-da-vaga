@@ -15,7 +15,7 @@ npm.cmd install
 npm.cmd run dev
 ```
 
-O Vite mostrará um endereço local, normalmente http://localhost:5173. Abra-o no navegador.
+O Vite mostrará um endereço local; neste computador, o jogo abriu em http://127.0.0.1:8080/. Abra o endereço informado no terminal.
 
 ## Testes
 ```powershell
