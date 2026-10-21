@@ -266,7 +266,7 @@ export default function Game() {
       // passing motorbike
       const mt = (t % 18) / 18;
       const mx = -40 + mt * (W * TS + 80);
-      drawMoto(ctx, mx - camX, 11 * TS + 2 - camY, true);
+      drawMoto(ctx, mx - camX, 11 * TS + 2 - camY, true, false, Math.floor(t / 18) % 2 !== 0);
       for (let i = 1; i <= 3; i++) {
         ctx.fillStyle = `rgba(230,190,130,${0.35 - i * 0.09})`;
         ctx.fillRect(Math.round(mx - camX - i * 5), Math.round(12 * TS + 10 - camY - ((t * 20 + i * 3) % 4)), 3, 3);

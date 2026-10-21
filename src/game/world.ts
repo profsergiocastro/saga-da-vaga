@@ -22,7 +22,7 @@ export function hash(x: number, y: number, s = 0): number {
 export type Building = {
   x: number; y: number; w: number; h: number; doorX: number;
   wall: string; roof: string; roofDark: string; trim: string;
-  sign?: string; signBg?: string; signFg?: string; awning?: string;
+  sign?: string; signBg?: string; signFg?: string; awning?: string; flatRoof?: boolean;
 };
 
 export const GATE: [number, number][] = [[32, 15], [33, 15]];
@@ -34,8 +34,8 @@ export const BUILDINGS: Building[] = [
   { x: 12, y: 4, w: 6, h: 5, doorX: 14, wall: "#5fb49c", roof: "#a44a3f", roofDark: "#76322a", trim: "#3d8a73", sign: "MERCEARIA SOL A PINO", signBg: "#fff3d6", signFg: "#7a3b2e" },
   { x: 24, y: 4, w: 8, h: 5, doorX: 27, wall: "#ef8fb1", roof: "#3d6fb6", roofDark: "#28508a", trim: "#c4607f", sign: "PAPELARIA DA CÉLIA", signBg: "#ffffff", signFg: "#28508a", awning: "#3d6fb6" },
   { x: 35, y: 4, w: 7, h: 5, doorX: 38, wall: "#f08a4b", roof: "#7a3b2e", roofDark: "#552519", trim: "#b85a2a", sign: "BODE & CIA LANCHES", signBg: "#2b1d18", signFg: "#ffd23f", awning: "#d7263d" },
-  { x: 26, y: 18, w: 6, h: 5, doorX: 28, wall: "#efe8d6", roof: "#2e7d5b", roofDark: "#1f5a41", trim: "#2e7d5b", sign: "BLOCO A", signBg: "#1f5a41", signFg: "#ffffff" },
-  { x: 35, y: 18, w: 7, h: 5, doorX: 38, wall: "#efe8d6", roof: "#c0392b", roofDark: "#8e2a1f", trim: "#2e7d5b", sign: "LABORATÓRIOS", signBg: "#1f5a41", signFg: "#ffffff" },
+  { x: 26, y: 18, w: 6, h: 5, doorX: 28, wall: "#eeeade", roof: "#d9d5c9", roofDark: "#a6a296", trim: "#2e7d5b", sign: "BLOCO A", signBg: "#1f5a41", signFg: "#ffffff", flatRoof: true },
+  { x: 35, y: 18, w: 7, h: 5, doorX: 38, wall: "#eeeade", roof: "#d9d5c9", roofDark: "#a6a296", trim: "#2e7d5b", sign: "LABORATÓRIOS", signBg: "#1f5a41", signFg: "#ffffff", flatRoof: true },
 ];
 
 export type World = { tiles: Uint8Array; poles: [number, number][] };
@@ -89,17 +89,19 @@ export function buildWorld(): World {
   // Buildings
   for (const b of BUILDINGS) rect(b.x, b.y, b.x + b.w - 1, b.y + b.h - 1, T.BUILDING);
   // Local decoration
-  for (const [x, y] of [[3, 27], [8, 27], [13, 28], [2, 16], [2, 21], [17, 27], [10, 2], [19, 2], [22, 3], [33, 2], [42, 2], [2, 8]]) set(x, y, T.TREE);
+  for (const [x, y] of [[3, 27], [8, 27], [13, 28], [2, 21], [17, 27], [10, 2], [19, 2], [22, 3], [33, 2], [42, 2], [2, 8]]) set(x, y, T.TREE);
   for (const [x, y] of [[5, 26], [15, 27], [23, 24], [23, 18], [11, 9], [21, 6], [1, 18], [18, 16]]) set(x, y, T.CACTUS);
   for (const [x, y] of [[5, 28], [11, 27], [23, 27], [20, 4], [3, 23]]) set(x, y, T.ROCK);
   for (const [x, y] of [[1, 9], [2, 9], [10, 8], [11, 8]]) set(x, y, T.FENCE);
-  // New accessible branches to the landmarks; all artwork is original pixel art inspired by local references.
+  // Accessible landmark paths; the onças monument now stands just outside the west wall of IFPI.
   rect(3, 13, 3, 15, T.WALK);
   rect(2, 15, 5, 15, T.PLAZA);
   rect(5, 16, 5, 18, T.PLAZA);
   rect(5, 24, 5, 27, T.WALK);
-  // Roundabout with the two onças, the armadillo monument, the seriema and the Praça do Relógio.
-  rect(2, 16, 4, 17, T.MON_ONCAS);
+  // Clear a small paved apron along the IFPI wall so players can approach and inspect the jaguars.
+  rect(22, 14, 22, 16, T.PLAZA);
+  rect(23, 14, 24, 15, T.MON_ONCAS);
+  // Other landmarks remain in their original map locations.
   rect(2, 26, 4, 27, T.MON_TATU);
   rect(23, 18, 24, 19, T.MON_SERIEMA);
   rect(9, 17, 11, 18, T.CLOCK);
@@ -123,17 +125,37 @@ export const INTERACT: Record<string, { label: string; lines: string[] }> = {
   "14,8": { label: "Mercearia", lines: ["Placa na porta: 'FIADO SÓ AMANHÃ'. O amanhã nunca chega."] },
   "27,8": { label: "Papelaria", lines: ["Cheiro de papel novo e cola branca. A Dona Célia está bem ali do lado, no balcão."] },
   "38,8": { label: "Lanchonete", lines: ["Cheirinho de paçoca de carne de sol... Foco! Primeiro a inscrição."] },
-  "32,10": { label: "Moto", lines: ["Uma moto com adesivo: 'Deus é fiel e o freio também'."] },
+  "32,10": { label: "Moto da cidade", lines: [
+    "A moto tem mais adesivos que o edital tem páginas. A seta, pelo visto, ficou para a segunda chamada.",
+    "Um estudante comenta: 'Tem gente que trata o capacete como item lendário de RPG: todo mundo conhece, poucos equipam.'",
+    "Cabelo não é airbag, e cabeça não tem peça de reposição. Capacete afivelado sempre — na vida real, segurança não é item cosmético.",
+    "A buzina vem de fábrica; a seta parece DLC."
+  ] },
+  "23,10": { label: "Observatório informal do trânsito", lines: [
+    "Este poste já ouviu três buzinas, duas aceleradas e quatro versões diferentes de quem tinha a preferência.",
+    "O cruzamento é tão imprevisível que o GPS pergunta: 'Quer seguir mesmo? Posso recalcular sua paz.'",
+    "Na dúvida, reduza a velocidade, respeite a sinalização e dê passagem. Chegar inteiro é a melhor rota."
+  ] },
+  "34,10": { label: "Central imaginária do trânsito", lines: [
+    "Placa invisível: PARE. O apressado lê: 'PARE... de pensar?'.",
+    "Aqui a seta às vezes parece segredo de Estado: ninguém sabe para onde o outro vai virar.",
+    "A piada é com a imprudência, não com quem dirige com cuidado: capacete, atenção e respeito às regras."
+  ] },
   "8,22": { label: "Banco", lines: ["Um banco quentinho de sol. Ótimo pra revisar, péssimo pra cochilar."] },
   "14,17": { label: "Banco", lines: ["Alguém escreveu no banco: 'Beto esteve aqui (estudando, juro)'."] },
-  "10,18": { label: "Relógio da Praça", lines: ["O relógio é o ponto de referência da Praça Professor Júlio Paixão.", "Moradores chamam o lugar de Praça do Relógio. O mapa recria a praça em arte original, não copia uma fotografia.", "Dizem que o relógio sempre adianta na semana de prova. Conveniente, né?"] },
-  "11,20": { label: "Praça do Relógio", lines: ["Você está na Praça Professor Júlio Paixão, conhecida por todo mundo como Praça do Relógio.", "O relógio voltou a marcar as horas — pelo menos até a próxima reforma.", "Beto jura que ele adianta cinco minutos em semana de prova."] },
+  "10,18": { label: "Monumento da Praça", lines: ["Você está diante do monumento baixo de concreto e do mural da Praça Professor Júlio Paixão.", "O nome popular continua sendo Praça do Relógio, embora a vista atual não mostre uma torre ou mostrador.", "Beto diz que o relógio é imaginário: adianta só quando ele está atrasado para a aula."] },
+  "11,20": { label: "Praça do Relógio", lines: ["Praça Professor Júlio Paixão — conhecida popularmente como Praça do Relógio.", "O monumento atual tem três vãos, blocos vazados nas laterais e um mural central. O relógio virou patrimônio da conversa.", "Beto jura que o relógio invisível sempre adianta cinco minutos em semana de prova."] },
   "28,22": { label: "Bloco A", lines: ["Salas vazias... por enquanto. O Episódio 2 vem aí!"] },
   "38,22": { label: "Laboratórios", lines: ["Um cartaz na porta: 'Favor não alimentar o servidor'."] },
   "29,16": { label: "Bandeira", lines: ["A bandeira tremula no vento quente do sertão."] },
   "33,25": { label: "Banco", lines: ["Daqui dá pra ver a Serra ao longe. Dá vontade de estudar arqueologia."] },
   "34,25": { label: "Banco", lines: ["Daqui dá pra ver a Serra ao longe. Dá vontade de estudar arqueologia."] },
-  "3,16": { label: "Monumento das Onças", lines: ["Duas onças pintadas vigiam uma das entradas da cidade.", "Ledo Ivo transformou a fauna da região em cartão-postal. Tire uma foto mental e siga a missão!"] },
+  "23,14": { label: "Monumento das Onças", lines: [
+    "Onça 1: 'A gente veio vigiar a entrada da cidade e acabou de plantão ao lado do IFPI.'",
+    "Onça 2: 'Pelo menos nós respeitamos a faixa. Já viu alguém tentar dar seta com o rabo?'",
+    "As duas encaram o trânsito: 'Capacete não é enfeite, pessoal. Até a gente protege a cabeça quando a coisa aperta.'",
+    "Você ganhou uma dica de sobrevivência sertaneja: estude para a vaga e atravesse com atenção."
+  ] },
   "4,26": { label: "Monumento do Tatu", lines: ["O tatu-canastra virou monumento em um monte de pedras claras.", "Até o tatu entendeu que pra entrar na cidade tem que passar por uma rotatória."] },
   "23,19": { label: "Monumento da Seriema", lines: ["Uma seriema de pescoço comprido e pernas finas marca outra entrada da cidade.", "A placa imaginária diz: 'Corre mais rápido que o estudante atrasado'."] },
 };

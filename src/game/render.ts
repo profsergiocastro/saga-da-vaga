@@ -186,7 +186,7 @@ function drawTile(c: C, t: number, tx: number, ty: number) {
   }
 }
 
-export function drawMoto(c: C, X: number, Y: number, rider: boolean, flip = false) {
+export function drawMoto(c: C, X: number, Y: number, rider: boolean, flip = false, helmet = true) {
   const m = (dx: number) => (flip ? X + 15 - dx : X + dx);
   const r = (col: string, dx: number, dy: number, w = 1, h = 1) => px(c, col, flip ? X + 16 - dx - w : X + dx, Y + dy, w, h);
   void m;
@@ -196,7 +196,13 @@ export function drawMoto(c: C, X: number, Y: number, rider: boolean, flip = fals
   r("#9a9a9a", 11, 4, 1, 3); r("#ffd23f", 12, 6, 2, 1);
   if (rider) {
     r("#2b2f4a", 6, 3, 3, 4); r("#3d8a73", 5, -2, 4, 5); r("#c68a5b", 9, 0, 2, 1);
-    r("#f2c14e", 5, -6, 4, 4); r("#ffffff", 6, -5, 2, 1);
+    if (helmet) {
+      r("#f2c14e", 5, -6, 4, 4); r("#ffffff", 6, -5, 2, 1);
+    } else {
+      // Helmetless rider shown as satire/warning, never as a recommended choice.
+      r("#2a1d1a", 4, -6, 5, 4); r("#c68a5b", 5, -5, 4, 3);
+      r("#2a1d1a", 5, -6, 3, 1);
+    }
   }
 }
 
@@ -206,23 +212,41 @@ function drawBuilding(c: C, b: Building) {
   // Deep cast shadow separates each facade from the ground and gives the scene a GBA-style depth cue.
   px(c, "rgba(39,31,24,0.24)", X + 5, Y + Hd - 1, Wd - 1, 5);
   px(c, O, X - 1, Y - 1, Wd + 2, roofH + (Hd - roofH) + 2);
-  // Roof: layered clay tiles instead of a single flat rectangle.
-  px(c, b.roofDark, X, Y, Wd, roofH);
-  px(c, b.roof, X + 1, Y + 1, Wd - 2, roofH - 4);
-  for (let yy = Y + 4; yy < Y + roofH - 4; yy += 5) {
-    px(c, b.roofDark, X + 1, yy, Wd - 2, 1);
-    px(c, "rgba(255,220,174,0.26)", X + 1, yy + 1, Wd - 2, 1);
-  }
-  for (let row = 0, yy = Y + 3; yy < Y + roofH - 4; row++, yy += 8) {
-    for (let col = 0, xx = X + (row % 2 ? 0 : 7); xx < X + Wd; col++, xx += 16) {
-      px(c, b.roofDark, xx, yy, 1, 5);
-      px(c, "rgba(255,231,190,0.28)", xx + 2, yy + 1, 5, 1);
-      if ((col + row) % 3 === 0) px(c, "rgba(45,28,20,0.18)", xx + 7, yy + 3, 4, 1);
+  if (b.flatRoof) {
+    // Campus buildings use a sober concrete parapet and flat slab, closer to the real IFPI blocks.
+    px(c, "#aaa69b", X - 1, Y - 1, Wd + 2, roofH + 4);
+    px(c, "#d8d4c8", X, Y, Wd, roofH);
+    px(c, "#efede4", X + 1, Y + 1, Wd - 2, 3);
+    px(c, "#c2beb2", X + 1, Y + 5, Wd - 2, 2);
+    px(c, "#f7f4eb", X + 2, Y + 2, Wd - 4, 1);
+    // Small roof vents hint at a working school campus.
+    px(c, "#99958a", X + Wd - 12, Y + 9, 6, 7);
+    px(c, "#b8b3a7", X + Wd - 11, Y + 10, 4, 5);
+    px(c, "#89857b", X + Wd - 13, Y + 8, 8, 2);
+    px(c, "#9d998e", X + 5, Y + 12, 8, 4);
+    px(c, "#bcb8ac", X + 6, Y + 13, 6, 2);
+    px(c, b.roofDark, X - 1, Y + roofH - 4, Wd + 2, 4);
+    px(c, b.trim, X, Y + roofH - 4, Wd, 1);
+  } else {
+    // Traditional tile roofs remain on the local shops and houses.
+    px(c, O, X - 1, Y - 1, Wd + 2, roofH + (Hd - roofH) + 2);
+    px(c, b.roofDark, X, Y, Wd, roofH);
+    px(c, b.roof, X + 1, Y + 1, Wd - 2, roofH - 4);
+    for (let yy = Y + 4; yy < Y + roofH - 4; yy += 5) {
+      px(c, b.roofDark, X + 1, yy, Wd - 2, 1);
+      px(c, "rgba(255,220,174,0.26)", X + 1, yy + 1, Wd - 2, 1);
     }
+    for (let row = 0, yy = Y + 3; yy < Y + roofH - 4; row++, yy += 8) {
+      for (let col = 0, xx = X + (row % 2 ? 0 : 7); xx < X + Wd; col++, xx += 16) {
+        px(c, b.roofDark, xx, yy, 1, 5);
+        px(c, "rgba(255,231,190,0.28)", xx + 2, yy + 1, 5, 1);
+        if ((col + row) % 3 === 0) px(c, "rgba(45,28,20,0.18)", xx + 7, yy + 3, 4, 1);
+      }
+    }
+    px(c, "rgba(255,242,212,0.48)", X + 1, Y + 1, Wd - 2, 1);
+    px(c, b.roofDark, X - 1, Y + roofH - 4, Wd + 2, 4);
+    px(c, b.trim, X, Y + roofH - 4, Wd, 1);
   }
-  px(c, "rgba(255,242,212,0.48)", X + 1, Y + 1, Wd - 2, 1);
-  px(c, b.roofDark, X - 1, Y + roofH - 4, Wd + 2, 4);
-  px(c, b.trim, X, Y + roofH - 4, Wd, 1);
   // Stucco facade with a light/shadow edge and small masonry accents.
   const wy = Y + roofH;
   px(c, b.wall, X, wy, Wd, Hd - roofH);
@@ -280,7 +304,7 @@ function drawBuilding(c: C, b: Building) {
 }
 
 function drawOncas(c: C) {
-  const X = 2 * TS, Y = 16 * TS - 8;
+  const X = 22 * TS - 2, Y = 14 * TS - 8;
   // Raised brick island and caatinga planting, based on the real twin-jaguar roundabout.
   px(c, "rgba(43,34,25,0.25)", X + 3, Y + 35, 46, 5);
   px(c, "#6f4835", X + 1, Y + 31, 48, 8);
@@ -512,6 +536,30 @@ function drawLocalLandmarks(c: C) {
   drawClock(c);
 }
 
+function drawCampusEntrance(c: C) {
+  // Original pixel-art interpretation of the real campus frontage: a long beige fascia,
+  // dark institutional lettering, green campus line and a shaded corridor below it.
+  const X = 25 * TS + 2, Y = 14 * TS - 8, Wd = 17 * TS - 4, Hd = 20;
+  px(c, "rgba(33,29,24,0.34)", X + 2, Y + Hd, Wd, 4);
+  px(c, "#9c988d", X - 1, Y - 1, Wd + 2, Hd + 2);
+  px(c, "#e4dfd2", X, Y, Wd, Hd);
+  px(c, "#f0ecdf", X + 1, Y + 1, Wd - 2, Hd - 4);
+  px(c, "#d0c9b8", X, Y + Hd - 4, Wd, 2);
+  px(c, "#2e7d5b", X, Y + Hd - 2, Wd, 2);
+  // Simplified green mark; it is redrawn as original game art, not copied from a raster logo.
+  px(c, "#2e9b63", X + 7, Y + 4, 8, 3);
+  px(c, "#2e9b63", X + 7, Y + 9, 8, 3);
+  px(c, "#2e9b63", X + 7, Y + 14, 8, 2);
+  px(c, "#1f5a41", X + 17, Y + 4, 2, 12);
+  c.textBaseline = "top";
+  c.font = "bold 7px monospace";
+  c.fillStyle = "#222722";
+  c.fillText("INSTITUTO FEDERAL DO PIAUÍ", X + 27, Y + 3);
+  c.font = "bold 6px monospace";
+  c.fillStyle = "#2e7d5b";
+  c.fillText("Campus São Raimundo Nonato", X + 27, Y + 11);
+}
+
 function board(c: C, X: number, Y: number, w: number, bg: string, l1: string, l2: string, fg2: string) {
   px(c, "#4a3a2a", X + 6, Y + 14, 3, 8); px(c, "#4a3a2a", X + w - 9, Y + 14, 3, 8);
   px(c, "#f1ead8", X - 1, Y - 1, w + 2, 18); px(c, bg, X, Y, w, 16);
@@ -536,8 +584,8 @@ export function prerender(world: World): HTMLCanvasElement {
     if (t !== T.BUILDING && t !== T.SIGN) drawTile(c, t, tx, ty);
   }
   drawLocalLandmarks(c);
-  board(c, 26 * TS + 2, 14 * TS - 6, 76, "#1f5a41", "INSTITUTO FEDERAL", "— CAMPUS SRN —", "#ffd23f");
-  board(c, 35 * TS + 2, 14 * TS - 6, 76, "#c8553d", "INSCRIÇÕES", "ABERTAS!", "#fff3d6");
+  drawCampusEntrance(c);
+  board(c, 35 * TS + 2, 16 * TS + 2, 66, "#c8553d", "INSCRIÇÕES", "ABERTAS!", "#fff3d6");
   // power lines
   const poles = [...world.poles].sort((a, b) => a[0] - b[0]);
   for (let i = 0; i < poles.length - 1; i++) {

@@ -2,6 +2,17 @@
 
 Este documento registra referências consultadas para desenhar cenários originais em pixel art. As fotografias não foram incorporadas ao jogo nem convertidas diretamente em sprites; foram usadas para compreender silhuetas, materiais, vegetação, pavimentação e contexto urbano.
 
+## IFPI — Campus São Raimundo Nonato
+
+- A foto pública da entrada mostra uma faixa horizontal bege, letreiro institucional escuro, identificação do campus em verde e um corredor de acesso sombreado sob a fachada.
+- A representação no jogo agora privilegia essa composição: letreiro comprido em tom areia, marca verde simplificada, blocos acadêmicos com cobertura plana de concreto e paredes claras, em vez de telhados cerâmicos de casas comerciais.
+- A imagem é uma referência de observação, não foi copiada ou embutida no canvas. O letreiro e a arquitetura do jogo são recriações em pixel art.
+- Referências consultadas:
+  - GP1 — foto da entrada do Campus São Raimundo Nonato: https://www.gp1.com.br/pi/piaui/noticia/2025/4/10/ifpi-abre-seletivo-para-professor-em-sao-raimundo-nonato-com-remuneracao-de-r-63-mil-591773.html
+  - IFPI — notícia do evento MUV no campus, com referência visual complementar: https://www.ifpi.edu.br/saoraimundononato/noticias/evento-muv-marca-semana-nacional-de-ciencia-e-tecnologia-em-sao-raimundo-nonato
+  - Repositório do PROFMAT — descrição e fotografia do campus: https://sca.profmat-sbm.org.br/busca_tcc_det.php?id=171053092&id1=5694
+  - Google Maps — Campus São Raimundo Nonato: https://www.google.com/maps/search/?api=1&query=IFPI+Campus+S%C3%A3o+Raimundo+Nonato
+
 ## Monumento das Onças Pintadas
 
 - Localização descrita nas referências: rotatória da PI-140 com a BR-020, bairro Primavera.
@@ -48,7 +59,6 @@ Os links do Google Maps servem para localizar os pontos e, quando houver cobertu
 - Fachadas comerciais do centro e calçadas;
 - Catedral de São Raimundo Nonato e entorno;
 - pontos de ônibus, mototáxis e mobiliário urbano;
-- paisagem de Caatinga no entorno do município;
-- entradas e caminhos de pedestres do IFPI Campus São Raimundo Nonato.
+- paisagem de Caatinga no entorno do município.
 
 A disposição atual no mapa é artística e simplificada; não representa uma planta geográfica precisa da cidade.
