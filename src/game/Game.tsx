@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DialogBox, DocsModal, HelpModal, Key, Menu, Notebook, Overlay, Panel, QuizModal, Confirm, OpeningCrawl } from "./ui";
+import { PlatformLevel } from "./PlatformLevel";
 import { ACHIEVEMENTS, OBJECTIVES, apply, dialogFor, initialProgress, type Action, type NpcId, type Progress } from "./quest";
 import { GATE, H, INTERACT, START, TS, VH, VW, W, buildWorld, isSolidTile } from "./world";
 import { drawChar, drawFlag, drawGate, drawMarker, drawMoto, prerender, type Dir, type Look } from "./render";
 
-type Mode = "intro" | "start" | "play" | "dialog" | "quiz" | "docs" | "notebook" | "help" | "pause" | "ending";
+type Mode = "intro" | "start" | "play" | "dialog" | "quiz" | "docs" | "notebook" | "help" | "pause" | "platform" | "ending";
 type Npc = { id: NpcId; name: string; x: number; y: number; dir: Dir; look: Look };
 
 const SAVE_KEY = "saga-da-vaga-v1";
@@ -16,6 +17,7 @@ const KEYDIR: Record<string, Dir> = {
 const OPP: Record<Dir, Dir> = { up: "down", down: "up", left: "right", right: "left" };
 
 const PLAYER_LOOK: Look = { skin: "#c68a5b", hair: "#1e1410", shirt: "#2f80c4", pants: "#2b2f4a", pack: "#e0503a" };
+const UNIFORM_LOOK: Look = { ...PLAYER_LOOK, shirt: "#f8f7ed", pack: "#267148", trim: "#25804c" };
 const makeNpcs = (): Npc[] => [
   { id: "beto", name: "Beto", x: 12, y: 17, dir: "down", look: { skin: "#a86b44", hair: "#2a1a12", shirt: "#f2c14e", pants: "#3b5b8a", cap: "#d7263d" } },
   { id: "celia", name: "Dona Célia", x: 28, y: 9, dir: "down", look: { skin: "#d9a37a", hair: "#a8a8a8", shirt: "#c8553d", pants: "#4a3b3b", apron: "#f5f0e1", glasses: true, bun: true } },
@@ -110,16 +112,17 @@ export default function Game() {
   };
 
   const continueGame = () => {
+    let nextProgress = initialProgress();
     try {
       const raw = localStorage.getItem(SAVE_KEY);
       if (raw) {
         const d = JSON.parse(raw) as SaveData;
-        const p = { ...initialProgress(), ...d.progress };
-        progRef.current = p; setProgress(p);
+        nextProgress = { ...initialProgress(), ...d.progress };
+        progRef.current = nextProgress; setProgress(nextProgress);
         placePlayer(d.player?.x ?? START.x, d.player?.y ?? START.y, d.player?.dir ?? "down");
       }
     } catch { /* corrupted save → keep defaults */ }
-    setMode("play");
+    setMode(nextProgress.step >= 4 && !nextProgress.platformDone ? "platform" : "play");
   };
 
   useEffect(() => {
@@ -182,7 +185,7 @@ export default function Game() {
     if (a === "beto") { doApply("beto"); setMode("play"); }
     else if (a === "docs") setMode("docs");
     else if (a === "quiz") setMode("quiz");
-    else if (a === "finish") { doApply("finish"); beep(990, 0.3, "triangle"); setMode("ending"); }
+    else if (a === "finish") { doApply("finish"); beep(990, 0.3, "triangle"); setMode("platform"); }
     else setMode("play");
   };
 
@@ -258,7 +261,7 @@ export default function Game() {
         draw: () => drawChar(ctx, n.x * TS - camX, n.y * TS - camY, n.look, n.dir, 0, Math.sin(t * 3 + i * 1.7) > 0.3 ? -1 : 0),
       }));
       const step = p.moving ? Math.floor(p.walk) % 4 : 0;
-      ents.push({ y: ppy, draw: () => drawChar(ctx, ppx - camX, ppy - camY, PLAYER_LOOK, p.dir, step, p.moving ? 0 : Math.sin(t * 2.5) > 0.6 ? -1 : 0) });
+      ents.push({ y: ppy, draw: () => drawChar(ctx, ppx - camX, ppy - camY, progRef.current.uniform ? UNIFORM_LOOK : PLAYER_LOOK, p.dir, step, p.moving ? 0 : Math.sin(t * 2.5) > 0.6 ? -1 : 0) });
       ents.sort((a, b) => a.y - b.y).forEach((e) => e.draw());
       const target = NEXT_NPC[progRef.current.step];
       const tn = g.npcs.find((n) => n.id === target);
@@ -294,7 +297,7 @@ export default function Game() {
   }, []);
 
   const obj = OBJECTIVES[progress.step] ?? OBJECTIVES[0]!;
-  const inGame = mode !== "start" && mode !== "intro";
+  const inGame = mode !== "start" && mode !== "intro" && mode !== "platform";
 
   return (
     <div className="game-stage">
@@ -327,6 +330,15 @@ export default function Game() {
         )}
 
         {mode === "intro" && <OpeningCrawl onDone={() => setMode("start")} />}
+
+        {mode === "platform" && (
+          <PlatformLevel onComplete={() => {
+            placePlayer(34, 16, "down");
+            doApply("platformClear");
+            setMode("play");
+            showToast("Uniforme do IFPI desbloqueado!");
+          }} />
+        )}
 
         {mode === "start" && (
           <Overlay>

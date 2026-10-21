@@ -353,7 +353,7 @@ function drawOncas(c: C) {
   px(c, "#35251c", X + 29, Y + 25, 4, 4); px(c, "#35251c", X + 39, Y + 25, 4, 4);
   px(c, "#e8b75e", X + 29, Y + 26, 3, 2); px(c, "#e8b75e", X + 39, Y + 26, 3, 2);
   px(c, "#35251c", X + 25, Y + 21, 2, 7); px(c, "#35251c", X + 24, Y + 27, 5, 2);
-  for (const [sx, sy] of [[29, 22], [33, 20], [37, 22], [34, 25], [41, 18], [43, 21], [39, 24]]) {
+  for (const [sx, sy] of [[29, 22], [33, 20], [37, 22], [34, 25], [41, 18], [43, 21], [39, 24]] as const) {
     px(c, "#6d4427", X + sx - 2, Y + sy - 1, 3, 3);
     px(c, "#35251c", X + sx - 1, Y + sy, 1, 1);
   }
@@ -609,7 +609,7 @@ export function prerender(world: World): HTMLCanvasElement {
 export type Dir = "up" | "down" | "left" | "right";
 export type Look = {
   skin: string; hair: string; shirt: string; pants: string;
-  pack?: string; cap?: string; apron?: string; tie?: string; glasses?: boolean; bun?: boolean; braids?: boolean; clipboard?: boolean;
+  pack?: string; cap?: string; apron?: string; tie?: string; trim?: string; glasses?: boolean; bun?: boolean; braids?: boolean; clipboard?: boolean;
 };
 
 export function drawChar(c: C, x: number, y: number, L: Look, dir: Dir, step: number, hb: number) {
@@ -654,6 +654,12 @@ export function drawChar(c: C, x: number, y: number, L: Look, dir: Dir, step: nu
   px(c, O, x + 11, y + 1 - sw, 3, 6);
   px(c, L.shirt, x + 3, y + 2 + sw, 2, 4);
   px(c, L.shirt, x + 11, y + 2 - sw, 2, 4);
+  if (L.trim) {
+    px(c, L.trim, x + 6, y, 4, 1);
+    px(c, L.trim, x + 4, y + 5, 1, 2);
+    px(c, L.trim, x + 11, y + 5, 1, 2);
+    px(c, L.trim, x + 10, y + 2, 1, 2);
+  }
   px(c, L.skin, x + 3, y + 6 + sw, 2, 2);
   px(c, L.skin, x + 11, y + 6 - sw, 2, 2);
   px(c, "rgba(255,255,255,0.3)", x + 4, y + 1, 1, 4);

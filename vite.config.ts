@@ -1,6 +1,6 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-const githubPagesBase = process.env.GITHUB_ACTIONS === "true" ? "/saga-da-vaga/" : "/";
+const githubPagesBase = process.env["GITHUB_ACTIONS"] === "true" ? "/saga-da-vaga/" : "/";
 
 export default defineConfig({
   vite: {

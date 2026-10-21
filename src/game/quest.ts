@@ -7,9 +7,11 @@ export type Progress = {
   solved: string[];
   quizWrong: number;
   docsWrong: number;
+  platformDone: boolean;
+  uniform: boolean;
 };
 
-export type Action = "beto" | "docs" | "docsOk" | "docsFail" | "quiz" | "quizOk" | "quizFail" | "finish";
+export type Action = "beto" | "docs" | "docsOk" | "docsFail" | "quiz" | "quizOk" | "quizFail" | "finish" | "platformClear";
 
 export const initialProgress = (): Progress => ({
   step: 0,
@@ -18,6 +20,8 @@ export const initialProgress = (): Progress => ({
   solved: [],
   quizWrong: 0,
   docsWrong: 0,
+  platformDone: false,
+  uniform: false,
 });
 
 export const OBJECTIVES: { title: string; hint: string }[] = [
@@ -62,6 +66,7 @@ export function checkQuiz(index: number): boolean {
 
 export const ACHIEVEMENTS: Record<string, { name: string; desc: string }> = {
   boato: { name: "Ouvinte de Boatos", desc: "Conversou com o Beto e sobreviveu." },
+  uniforme: { name: "Calouro Uniformizado", desc: "Concluiu a Rota do Calouro e ganhou a camisa do IFPI." },
   grampo: { name: "Grampeador Profissional", desc: "Organizou os documentos na ordem do edital." },
   porcento: { name: "Mestre dos 25%", desc: "Resolveu a questão de porcentagem." },
   persist: { name: "Errar Faz Parte", desc: "Errou, respirou e tentou de novo." },
@@ -89,6 +94,10 @@ export function apply(p: Progress, action: Action): Progress {
     case "finish":
       return p.step === 3
         ? { ...p, step: 4, items: add(p.items, "Selo de Inscrição Carimbada"), achievements: add(p.achievements, "inscrito") }
+        : p;
+    case "platformClear":
+      return p.step >= 4 && !p.platformDone
+        ? { ...p, platformDone: true, uniform: true, items: add(p.items, "Camisa do IFPI"), achievements: add(p.achievements, "uniforme") }
         : p;
     default:
       return p;
